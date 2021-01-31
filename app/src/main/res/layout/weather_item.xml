@@ -16,8 +16,8 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_margin="5dp"
-        app:cardElevation="1dp"
-        app:cardCornerRadius="2dp"
+        app:cardElevation="4dp"
+        app:cardCornerRadius="4dp"
         android:onClick="@{(view)->myclick.gotodetailScreen(view,weatherdata)}"
         android:layout_height="wrap_content">
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -26,27 +26,42 @@
 
             <TextView
                 android:id="@+id/textView2"
+                style="@style/TextAppearance.MaterialComponents.Body2"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="4dp"
                 android:layout_marginEnd="8dp"
-                android:layout_marginBottom="16dp"
-                android:text="@{String.valueOf(weather.coord.lat)+` - `+String.valueOf(weather.coord.lon)}"
+                android:layout_marginBottom="8dp"
+                android:text="@{`coordinates: `+String.valueOf(weather.coord.lat)+`,`+String.valueOf(weather.coord.lon)}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/delete_item"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/textView7"
+                tools:text="location coordinates" />
 
             <ImageView
                 android:id="@+id/delete_item"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/textView2"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/textView7"
                 app:srcCompat="@android:drawable/ic_menu_delete" />
+
+            <TextView
+                android:id="@+id/textView7"
+                style="@style/TextAppearance.AppCompat.Subhead"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                tools:text="City Name"
+                android:text="@{weatherdata.city}"
+                app:layout_constraintEnd_toStartOf="@+id/delete_item"
+                app:layout_constraintStart_toStartOf="@+id/textView2"
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 </layout>

@@ -7,15 +7,20 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-class Weatherdata(val weather: String):Parcelable{
+class Weatherdata(val location:String,val city:String, val weather: String):Parcelable{
     @PrimaryKey(autoGenerate = true)
     var id: Int=0
 
-    constructor(parcel: Parcel) : this(parcel.readString()!!) {
+    constructor(parcel: Parcel) : this(
+            parcel.readString()!!,
+            parcel.readString()!!,
+            parcel.readString()!!) {
         id = parcel.readInt()
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(location)
+        parcel.writeString(city)
         parcel.writeString(weather)
         parcel.writeInt(id)
     }
@@ -33,4 +38,6 @@ class Weatherdata(val weather: String):Parcelable{
             return arrayOfNulls(size)
         }
     }
+
+
 }

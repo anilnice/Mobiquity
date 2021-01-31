@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -38,23 +39,19 @@ class MapsFragment : Fragment() {
     lateinit var apiCall:ApiService
     val database by lazy { context?.let { WeatherRoomdatabase.getDatabase(it) } }
     val repository by lazy { WeatherRepository(database!!.weatherDao()) }
+    lateinit var latLng: LatLng
+    lateinit var loader: ProgressBar
 
     private val callback = OnMapReadyCallback { googleMap ->
-        /**
-         * Manipulates the map once available.
-         * This callback is triggered when the map is ready to be used.
-         * This is where we can add markers or lines, add listeners or move the camera.
-         * In this case, we just add a marker near Sydney, Australia.
-         * If Google Play services is not installed on the device, the user will be prompted to
-         * install it inside the SupportMapFragment. This method will only be triggered once the
-         * user has installed Google Play services and returned to the app.
-         */
+
         val india = LatLng(20.5937, 78.9629)
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(india,4f))
         googleMap.setOnMapLongClickListener {
+            latLng=it
+            mapViewModel.weatherloader.value=false
             googleMap.clear()
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(it,8f))
-            googleMap.addMarker(MarkerOptions().position(it).title("Marker in Sydney"))
+            googleMap.addMarker(MarkerOptions().position(it))
             mapViewModel.getNetworkCall(apiCall,it)
         }
     }
@@ -72,31 +69,35 @@ class MapsFragment : Fragment() {
 
         })*/
         val v=inflater.inflate(R.layout.fragment_maps, container, false)
-
+        loader=v.findViewById(R.id.weather_loader)
         mapViewModel.getWeather().observe(viewLifecycleOwner, Observer { weather ->
-            Toast.makeText(context, "${weather.coord.lat},${weather.coord.lon}", Toast.LENGTH_LONG)
-                .show()
             activity?.let { it1 ->
                 val binding = WeatherDialogBinding.inflate(layoutInflater)
                 binding.weather = weather!!
                 binding.executePendingBindings()
-                MaterialAlertDialogBuilder(it1)
+                val city= context?.let { Converters.getAdressFromlocation(it,weather.coord.lat,weather.coord.lon) }
+                MaterialAlertDialogBuilder(it1).setTitle(city)
                     .setView(binding.root)
-                    .setTitle("Weather report")
                     .setPositiveButton("Ok", object : DialogInterface.OnClickListener {
                         override fun onClick(p0: DialogInterface?, p1: Int) {
                             p0!!.dismiss()
                         }
-
                     })
-                    .setNegativeButton("Book mark", object : DialogInterface.OnClickListener {
+                    .setNegativeButton("Bookmark", object : DialogInterface.OnClickListener {
                         override fun onClick(p0: DialogInterface?, p1: Int) {
-                            mapViewModel.insert(Weatherdata(Converters.jsonTostring(weather)))
+                            val location=""+latLng.latitude+","+latLng.longitude
+                            mapViewModel.insert(Weatherdata(location,city!!,Converters.jsonTostring(weather)))
                             Log.d(TAG, "onClick: ${Converters.jsonTostring(weather)}")
-                            //p0!!.dismiss()
                         }
                     }).show()
+            }
+        })
 
+        mapViewModel.weatherloader.observe(viewLifecycleOwner, Observer {
+            if(it!!){
+                loader.visibility=View.GONE
+            }else{
+                loader.visibility=View.VISIBLE
             }
         })
 

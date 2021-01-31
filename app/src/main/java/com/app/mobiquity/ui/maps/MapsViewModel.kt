@@ -21,6 +21,8 @@ class MapsViewModel(private val repository: WeatherRepository) : ViewModel() {
     val allWeatherdata: LiveData<List<Weatherdata>>  = repository.allWords.asLiveData()
     lateinit var maprepository:MapRepository
     var weatherlive=MutableLiveData<Weather>()
+    var weatherloader=MutableLiveData<Boolean>(true)
+
 
     fun insert(weatherdata: Weatherdata)=viewModelScope.launch{
         repository.insert(weatherdata)
@@ -29,15 +31,17 @@ class MapsViewModel(private val repository: WeatherRepository) : ViewModel() {
 
     fun getNetworkCall(apiCall: ApiService, location: LatLng?) {
         if (location != null) {
-            apiCall.getWeather(location.latitude,location.longitude,BuildConfig.AppId).enqueue(
+            apiCall.getWeather(location.latitude,location.longitude,BuildConfig.AppId,"metric").enqueue(
                 object :
                     Callback<Weather> {
                     override fun onResponse(call: Call<Weather>, response: Response<Weather>) {
                         weatherlive.value = response.body()!!
+                        weatherloader.value=true
                     }
 
                     override fun onFailure(call: Call<Weather>, t: Throwable) {
                         Log.d(TAG, "onFailure: ${t.message}")
+                        weatherloader.value=true
                     }
                 })
         }
